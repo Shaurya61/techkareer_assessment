@@ -22,6 +22,7 @@ export const signup = async (req, res) => {
       email,
       password_hash,
       created_at: new Date(),
+      updated_at: new Date()
     });
 
     res.status(201).send('User registered successfully!');
@@ -38,6 +39,8 @@ export const signup = async (req, res) => {
  */
 export const login = async (req, res) => {
   const { email, password } = req.body;
+  console.log('Received Email:', email); // Should be the actual email
+  console.log('Received Password:', password); // Should be the actual password
   try {
     const users = await db.select().from(userSchema).where(eq(userSchema.email, email));
     const user = users[0]; // Assuming emails are unique

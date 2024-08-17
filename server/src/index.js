@@ -1,23 +1,20 @@
 import express from 'express';
-import http from 'http';
-import { Server } from 'socket.io';
+import { Server } from "socket.io";
+import http from "http";
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes.js';
-import { config } from 'dotenv';
-import chatRoutes from './routes/chatRoutes.js';
-import verifyToken from './middlewares/authMiddlewares.js';
 import userRoutes from './routes/userRoutes.js';
-
+import { config } from 'dotenv';
 config();
 
 const app = express();
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173',
-    methods: ['GET', 'POST'],
-    credentials: true,
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"],
   },
 });
 
@@ -30,32 +27,31 @@ app.use(cors({
 }));
 
 app.use('/auth', authRoutes);
+app.use('/api', userRoutes);
 
+io.on("connection", (socket) => {
+  const { userId } = socket.handshake.query;
 
-// Socket.io connection
-io.on('connection', (socket) => {
-  console.log(`User connected: ${socket.id}`);
+  console.log(`User connected: ${userId}`);
 
-  // Handle incoming messages
-  socket.on('send_message', async (data) => {
-    await db.insert(messagesSchema).values({
-      sender_id: data.sender_id,
-      receiver_id: data.receiver_id,
-      content: data.content,
-      timestamp: new Date(),
-    });
-
-    io.to(data.receiver_id.toString()).emit('receive_message', data);
+  // Handle joining a room when a user selects another user
+  socket.on("joinRoom", (room) => {
+    socket.join(room);
+    console.log(`User ${userId} joined room: ${room}`);
   });
 
-  socket.on('disconnect', () => {
-    console.log(`User disconnected: ${socket.id}`);
+  // Handle sending a message to the room
+  socket.on("sendMessage", (message) => {
+    const room = [message.senderId, message.receiverId].sort().join("-");
+    io.to(room).emit("receiveMessage", message);
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`User disconnected: ${userId}`);
   });
 });
-app.use('/api', verifyToken, chatRoutes);
-app.use('/api/users', verifyToken, userRoutes);
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

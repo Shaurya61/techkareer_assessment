@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from './store/authSlice'
+import authReducer from './store/authSlice';
+import chatReducer from './store/chatSlice'
 
 const initialState = {
   auth: {
@@ -11,6 +12,7 @@ const initialState = {
 const store = configureStore({
   reducer: {
     auth: authReducer,
+    chat: chatReducer
     
   },
   preloadedState: initialState, // Load initial state from localStorage

@@ -1,16 +1,16 @@
 // src/pages/Signup.tsx
 import React from 'react';
-import AuthForm from '../components/AuthForm';
+import SignupForm from '../components/SignupForm';
 
 const Signup: React.FC = () => {
-  const handleSignup = async (email: string, password: string) => {
+  const handleSignup = async (name:string,email: string, password: string) => {
     try {
         const response = await fetch('http://localhost:3000/auth/signup', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({name, email, password }),
       });
       if (response.ok) {
         alert('Signup successful!');
@@ -25,7 +25,7 @@ const Signup: React.FC = () => {
   return (
     <div>
       <h1 className="text-2xl text-center">Signup</h1>
-      <AuthForm onSubmit={handleSignup} buttonText="Sign Up" />
+      <SignupForm onSubmit={handleSignup} buttonText="Sign Up" />
     </div>
   );
 };
